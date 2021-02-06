@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Net;
 
 namespace WorldTour
 {
@@ -23,6 +24,20 @@ namespace WorldTour
         private Random random = new Random();
 
         private static readonly string defaultSaveLocation = @"data/save.sav";
+        private static readonly string dataURL = @"https://raw.githubusercontent.com/GokselKUCUKSAHIN/WorldTour/main/WorldTour/bin/Debug/data/save.sav";
+
+        private void CheckFiles()
+        {
+            if (!Directory.Exists(@"data"))
+            {
+                Directory.CreateDirectory(@"data");
+            }
+            if (!File.Exists(@"data/save.sav"))
+            {
+                FirstTime();
+            }
+            LoadData();
+        }
 
         private void LoadData()
         {
@@ -54,6 +69,22 @@ namespace WorldTour
                 }
             }
             //MessageBox.Show(this.cities.Count + "");
+        }
+
+        private void FirstTime()
+        {
+            try
+            {
+                var response = new WebClient().DownloadString(dataURL);
+                using (var wrtr = new StreamWriter(defaultSaveLocation, false))
+                {
+                    wrtr.Write(response);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Sorun!!!");
+            }
         }
 
         private void SaveData()
@@ -121,7 +152,7 @@ namespace WorldTour
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            LoadData();
+            CheckFiles();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -154,7 +185,7 @@ namespace WorldTour
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            if(delay > 0)
+            if (delay > 0)
             {
                 // "Bir Sonraki Tıklama " + (delay--) / 10.0 + "s"
                 buttonNext.Text = String.Format("Bir Sonraki Tıklama {0:0.0}s", (delay--) / 10.0);
